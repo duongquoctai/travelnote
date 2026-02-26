@@ -1,5 +1,6 @@
 "use client";
 
+import { Icon } from "@iconify/react";
 import { signIn } from "next-auth/react";
 import { useState } from "react";
 import PinInput from "./PinInput";
@@ -69,7 +70,10 @@ const AuthModal = () => {
 
           {loading && (
             <div className="flex justify-center">
-              <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+              <Icon
+                icon="mdi:loading"
+                className="w-6 h-6 text-blue-500 animate-spin"
+              />
             </div>
           )}
 

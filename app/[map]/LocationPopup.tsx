@@ -1,7 +1,9 @@
 "use client";
 
 import { LocationProperties } from "@/app/types/map";
+import { Icon } from "@iconify/react";
 import { useFieldArray, useForm } from "react-hook-form";
+import Button from "../components/ui/Button";
 
 interface LocationPopupProps {
   id: string;
@@ -52,20 +54,7 @@ const LocationPopup = ({
         <div className="space-y-1.5">
           <div className="flex items-center justify-between text-xs font-semibold text-zinc-500 dark:text-zinc-400">
             <span className="flex items-center gap-1">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="w-3.5 h-3.5"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125"
-                />
-              </svg>
+              <Icon icon="mdi:note-text-outline" className="w-3.5 h-3.5" />
               Ghi chú
             </span>
           </div>
@@ -81,43 +70,18 @@ const LocationPopup = ({
         <div className="space-y-2">
           <div className="flex items-center justify-between text-xs font-semibold text-zinc-500 dark:text-zinc-400">
             <span className="flex items-center gap-1">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="w-3.5 h-3.5"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"
-                />
-              </svg>
+              <Icon icon="mdi:link-variant" className="w-3.5 h-3.5" />
               Liên kết
             </span>
-            <button
+            <Button
               type="button"
+              size="icon"
+              variant="ghost"
               onClick={() => append({ value: "" })}
-              className="p-1 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-md text-blue-500 transition-colors"
               title="Thêm liên kết"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={2}
-                stroke="currentColor"
-                className="w-3.5 h-3.5"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M12 4.5v15m7.5-7.5h-15"
-                />
-              </svg>
-            </button>
+              className="text-blue-500"
+              icon="mdi:plus"
+            />
           </div>
 
           <div className="space-y-2">
@@ -142,20 +106,7 @@ const LocationPopup = ({
                           className="text-zinc-400 hover:text-blue-500 transition-colors"
                           title="Copy"
                         >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            strokeWidth={1.5}
-                            stroke="currentColor"
-                            className="w-3 h-3"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5a3.375 3.375 0 00-3.375-3.375H9.75"
-                            />
-                          </svg>
+                          <Icon icon="mdi:content-copy" className="w-3 h-3" />
                         </button>
                         <a
                           href={watch(`links.${index}.value`)}
@@ -164,45 +115,20 @@ const LocationPopup = ({
                           className="text-zinc-400 hover:text-blue-500 transition-colors"
                           title="Mở"
                         >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            strokeWidth={1.5}
-                            stroke="currentColor"
-                            className="w-3 h-3"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"
-                            />
-                          </svg>
+                          <Icon icon="mdi:open-in-new" className="w-3 h-3" />
                         </a>
                       </>
                     )}
                   </div>
                 </div>
-                <button
+                <Button
                   type="button"
+                  size="icon"
+                  variant="danger"
                   onClick={() => remove(index)}
-                  className="p-1.5 text-zinc-400 hover:text-red-500 transition-all rounded-md hover:bg-red-50 dark:hover:bg-red-900/10"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={2}
-                    stroke="currentColor"
-                    className="w-3 h-3"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
-                </button>
+                  icon="mdi:close"
+                  className="p-1.5!"
+                />
               </div>
             ))}
           </div>

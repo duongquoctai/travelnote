@@ -89,7 +89,7 @@ const MapRoutes = ({ locations }: MapRoutesProps) => {
           "line-cap": "round",
         }}
         paint={{
-          "line-color": "#3b82f6",
+          "line-color": "#0018f9",
           "line-width": 5,
           "line-opacity": 1,
           "line-dasharray": [2, 2],

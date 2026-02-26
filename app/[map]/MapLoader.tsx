@@ -1,7 +1,9 @@
 "use client";
 import { Location, LocationProperties } from "@/app/types/map";
+import { useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
 import { useState } from "react";
+import AuthModal from "../components/auth/AuthModal";
 import SearchPanel from "./SearchPanel";
 
 const MapComponent = dynamic(() => import("./Map"), {
@@ -10,9 +12,6 @@ const MapComponent = dynamic(() => import("./Map"), {
 });
 
 const DEFAULT_CENTER: [number, number] = [10.762622, 106.660172]; // Tọa độ TP.HCM
-
-import { useSession } from "next-auth/react";
-import AuthModal from "../components/auth/AuthModal";
 
 const MapLoader = () => {
   const { status } = useSession();
@@ -25,7 +24,6 @@ const MapLoader = () => {
       name: "Thành phố Hồ chí Minh",
     },
   ]);
-
   const handleUpdateLocations = (newLocations: Location[]) => {
     setLocations(newLocations);
     if (newLocations.length > 0) {

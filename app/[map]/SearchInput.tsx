@@ -1,6 +1,5 @@
-"use client";
-
 import { SearchResult } from "@/app/types/map";
+import { Icon } from "@iconify/react";
 
 interface SearchInputProps {
   id: string;
@@ -30,7 +29,7 @@ const SearchInput = ({
       <div className="flex items-center gap-3">
         {/* Location Dot */}
         <div className="shrink-0 w-7 h-7 rounded-full bg-blue-500 flex items-center justify-center border-2 border-white dark:border-zinc-900 shadow-sm">
-          <div className="w-2 h-2 rounded-full bg-white" />
+          <div className="w-1.5 h-1.5 rounded-full bg-white" />
         </div>
 
         {/* Search Input Container */}
@@ -46,25 +45,10 @@ const SearchInput = ({
           <div className="absolute right-1 top-1/2 -translate-y-1/2 flex items-center gap-0.5">
             {loading && (
               <div className="p-1.5">
-                <svg
+                <Icon
+                  icon="mdi:loading"
                   className="animate-spin h-4 w-4 text-blue-500"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                    fill="none"
-                  />
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  />
-                </svg>
+                />
               </div>
             )}
             {!isOnlyItem && (
@@ -73,37 +57,11 @@ const SearchInput = ({
                 className="p-1.5 rounded-lg text-zinc-400 hover:text-red-500 hover:bg-red-50/50 dark:hover:bg-red-900/20 transition-colors"
                 title="Xóa điểm này"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={2}
-                  stroke="currentColor"
-                  className="w-4 h-4"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="m14.74 9-.34 9m-4.74 0-.34-9m9.26-2.35a11.95 11.95 0 0 1-12.83 0m14.3 3a12.605 12.605 0 0 1-16.4 0m16.4 0l-1.5 7.5a2 2 0 0 1-2 2H8.5a2 2 0 0 1-2-2l-1.5-7.5m10.5 0-2.5-5"
-                  />
-                </svg>
+                <Icon icon="mdi:delete" className="w-4 h-4" />
               </button>
             )}
             <div className="p-1.5 text-zinc-400">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={2}
-                stroke="currentColor"
-                className="w-4 h-4"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196 7.5 7.5 0 0 0 16.003 16.003Z"
-                />
-              </svg>
+              <Icon icon="mdi:magnify" className="w-4 h-4" />
             </div>
           </div>
 

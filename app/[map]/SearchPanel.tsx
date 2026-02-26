@@ -7,6 +7,9 @@ import {
   SearchResult,
 } from "@/app/types/map";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { toast } from "react-toastify";
+import JourneyDrawer from "../components/map/JourneyDrawer";
+import Button from "../components/ui/Button";
 import { debounce } from "../utils/helper";
 import SearchInput from "./SearchInput";
 
@@ -24,6 +27,8 @@ const SearchPanel = ({ locations, onUpdateLocations }: SearchPanelProps) => {
   const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>(
     {},
   );
+  const [isSaving, setIsSaving] = useState(false);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
 
   // Close results when clicking outside
@@ -114,59 +119,97 @@ const SearchPanel = ({ locations, onUpdateLocations }: SearchPanelProps) => {
     onUpdateLocations(locations.filter((loc) => loc.id !== id));
   };
 
+  const handleSave = async () => {
+    if (locations.length === 0) return;
+
+    setIsSaving(true);
+    try {
+      const response = await fetch("/api/journeys", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ locations }),
+      });
+
+      if (!response.ok) throw new Error("Failed to save journey");
+
+      toast.success("Lưu hành trình thành công!");
+    } catch (error) {
+      console.error("Save error:", error);
+      toast.error("Đã có lỗi xảy ra khi lưu.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   return (
-    <div
-      ref={panelRef}
-      className="absolute top-4 right-4 z-1000 w-80 md:w-96 flex flex-col gap-3"
-    >
-      <div className="bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md rounded-2xl shadow-2xl p-4 border border-zinc-200 dark:border-zinc-800 transition-all duration-300">
-        <div className="relative flex flex-col gap-6">
-          {/* Vertical Dotted Line */}
-          {locations.length > 1 && (
-            <div className="absolute left-[13px] top-4 bottom-4 w-px border-l-2 border-dotted border-zinc-300 dark:border-zinc-700 z-0" />
-          )}
+    <>
+      <div
+        ref={panelRef}
+        className="absolute top-4 right-4 z-10 w-80 md:w-96 flex flex-col gap-3"
+      >
+        <div className="bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md rounded-2xl shadow-2xl p-4 border border-zinc-200 dark:border-zinc-800 transition-all duration-300">
+          <div className="relative flex flex-col gap-6">
+            {/* Vertical Dotted Line */}
+            {locations.length > 1 && (
+              <div className="absolute left-[13px] top-4 bottom-4 w-px border-l-2 border-dotted border-zinc-300 dark:border-zinc-700 z-0" />
+            )}
 
-          {locations.map((location) => (
-            <SearchInput
-              key={location.id}
-              id={location.id}
-              query={queries[location.id] || ""}
-              loading={loadingStates[location.id] || false}
-              onQueryChange={handleInputChange}
-              onRemove={removeLocation}
-              onSelect={selectLocation}
-              activeResults={
-                activeResults?.id === location.id ? activeResults.items : null
-              }
-              isActive={activeResults?.id === location.id}
-              isOnlyItem={locations.length <= 1}
-            />
-          ))}
+            {locations.map((location) => (
+              <SearchInput
+                key={location.id}
+                id={location.id}
+                query={queries[location.id] || ""}
+                loading={loadingStates[location.id] || false}
+                onQueryChange={handleInputChange}
+                onRemove={removeLocation}
+                onSelect={selectLocation}
+                activeResults={
+                  activeResults?.id === location.id ? activeResults.items : null
+                }
+                isActive={activeResults?.id === location.id}
+                isOnlyItem={locations.length <= 1}
+              />
+            ))}
+          </div>
+
+          <div className="flex gap-2 mt-6">
+            <Button
+              variant="outline"
+              icon="mdi:plus"
+              onClick={addNewLocation}
+              className="flex-1"
+            >
+              Thêm địa điểm
+            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant="primary"
+                icon="mdi:check"
+                onClick={handleSave}
+                isLoading={isSaving}
+                title="Lưu hành trình"
+              >
+                Lưu
+              </Button>
+              <Button
+                variant="primary"
+                icon="mdi:account"
+                onClick={() => setIsDrawerOpen(true)}
+                title="Hành trình của tôi"
+              />
+            </div>
+          </div>
         </div>
-
-        {/* Add Location Button */}
-        <button
-          onClick={addNewLocation}
-          className="mt-6 w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border-2 border-dashed border-zinc-200 dark:border-zinc-800 text-zinc-500 hover:text-blue-500 hover:border-blue-500 hover:bg-blue-50/50 dark:hover:bg-blue-900/10 transition-all text-sm font-medium"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={2}
-            stroke="currentColor"
-            className="w-4 h-4"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M12 4.5v15m7.5-7.5h-15"
-            />
-          </svg>
-          Thêm địa điểm
-        </button>
       </div>
-    </div>
+
+      <JourneyDrawer
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+        onSelectJourney={(locs) => onUpdateLocations(locs)}
+      />
+    </>
   );
 };
 
