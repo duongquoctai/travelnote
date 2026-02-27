@@ -4,6 +4,7 @@ import { Location } from "@/app/types/map";
 import { Icon } from "@iconify/react";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
+import { useRouter } from "next/navigation";
 import { memo, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
@@ -19,7 +20,6 @@ interface Journey {
 interface JourneyDrawerProps {
   isOpen: boolean;
   onClose: () => void;
-  onSelectJourney: (locations: Location[]) => void;
 }
 
 const JourneyCard = memo(
@@ -30,7 +30,7 @@ const JourneyCard = memo(
   }: {
     journey: Journey;
     onUpdate: (id: string, newName: string) => Promise<void>;
-    onSelect: (locations: Location[]) => void;
+    onSelect: (locations: Location[], id: string) => void;
   }) => {
     const [isEditing, setIsEditing] = useState(false);
     const {
@@ -130,7 +130,7 @@ const JourneyCard = memo(
           variant="secondary"
           size="sm"
           className="mt-4 w-full bg-white dark:bg-zinc-800 border-blue-100 dark:border-blue-900/50 text-blue-500"
-          onClick={() => onSelect(journey.locations)}
+          onClick={() => onSelect(journey.locations, journey._id)}
         >
           Xem trên bản đồ
         </Button>
@@ -141,11 +141,8 @@ const JourneyCard = memo(
 
 JourneyCard.displayName = "JourneyCard";
 
-const JourneyDrawer = ({
-  isOpen,
-  onClose,
-  onSelectJourney,
-}: JourneyDrawerProps) => {
+const JourneyDrawer = ({ isOpen, onClose }: JourneyDrawerProps) => {
+  const router = useRouter();
   const [journeys, setJourneys] = useState<Journey[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -196,14 +193,14 @@ const JourneyDrawer = ({
       {/* Overlay */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 transition-opacity"
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 transition-opacity pointer-events-auto"
           onClick={onClose}
         />
       )}
 
       {/* Drawer */}
       <div
-        className={`fixed top-0 right-0 h-full w-80 md:w-96 bg-white dark:bg-zinc-900 shadow-2xl z-60 transform transition-transform duration-300 ease-in-out ${isOpen ? "translate-x-0" : "translate-x-full"}`}
+        className={`fixed top-0 right-0 h-full w-80 md:w-96 bg-white dark:bg-zinc-900 shadow-2xl z-60 transform transition-transform duration-300 ease-in-out pointer-events-auto ${isOpen ? "translate-x-0" : "translate-x-full"}`}
       >
         <div className="flex flex-col h-full">
           {/* Header */}
@@ -242,8 +239,8 @@ const JourneyDrawer = ({
                   key={journey._id}
                   journey={journey}
                   onUpdate={handleUpdateName}
-                  onSelect={(locs) => {
-                    onSelectJourney(locs);
+                  onSelect={(locs, id) => {
+                    router.push(`/map/${id}`);
                     onClose();
                   }}
                 />

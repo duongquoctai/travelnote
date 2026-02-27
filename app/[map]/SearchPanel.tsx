@@ -1,24 +1,34 @@
-"use client";
-
 import {
   Location,
   MapTilerFeature,
   MapTilerResponse,
   SearchResult,
 } from "@/app/types/map";
+import { Icon } from "@iconify/react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import JourneyDrawer from "../components/map/JourneyDrawer";
 import Button from "../components/ui/Button";
+import { useMapContext } from "../context/MapContext";
 import { debounce } from "../utils/helper";
+import PlaceDetails from "./PlaceDetails";
 import SearchInput from "./SearchInput";
 
 interface SearchPanelProps {
   locations: Location[];
   onUpdateLocations: (locations: Location[]) => void;
+  journeyId?: string;
 }
 
-const SearchPanel = ({ locations, onUpdateLocations }: SearchPanelProps) => {
+const SearchPanel = ({
+  locations,
+  onUpdateLocations,
+  journeyId,
+}: SearchPanelProps) => {
+  const router = useRouter();
+  const { journeyName } = useMapContext();
   const [queries, setQueries] = useState<Record<string, string>>({});
   const [activeResults, setActiveResults] = useState<{
     id: string;
@@ -124,8 +134,11 @@ const SearchPanel = ({ locations, onUpdateLocations }: SearchPanelProps) => {
 
     setIsSaving(true);
     try {
-      const response = await fetch("/api/journeys", {
-        method: "POST",
+      const url = journeyId ? `/api/journeys/${journeyId}` : "/api/journeys";
+      const method = journeyId ? "PATCH" : "POST";
+
+      const response = await fetch(url, {
+        method,
         headers: {
           "Content-Type": "application/json",
         },
@@ -134,7 +147,12 @@ const SearchPanel = ({ locations, onUpdateLocations }: SearchPanelProps) => {
 
       if (!response.ok) throw new Error("Failed to save journey");
 
-      toast.success("Lưu hành trình thành công!");
+      const data = await response.json();
+      toast.success("Lưu thành công");
+
+      if (!journeyId && data._id) {
+        router.push(`/map/${data._id}`);
+      }
     } catch (error) {
       console.error("Save error:", error);
       toast.error("Đã có lỗi xảy ra khi lưu.");
@@ -147,8 +165,24 @@ const SearchPanel = ({ locations, onUpdateLocations }: SearchPanelProps) => {
     <>
       <div
         ref={panelRef}
-        className="absolute top-4 right-4 z-10 w-80 md:w-96 flex flex-col gap-3"
+        className="absolute top-4 right-4 z-10 w-80 md:w-96 flex flex-col gap-3 pointer-events-auto"
       >
+        {journeyName && (
+          <div className="bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md rounded-2xl shadow-xl px-5 py-3 border border-zinc-200 dark:border-zinc-800 flex items-center gap-3 animate-in fade-in slide-in-from-top-2 duration-500">
+            <div className="p-2 bg-blue-500 rounded-lg shadow-lg shadow-blue-500/20">
+              <Icon icon="mdi:map-marker-path" className="w-5 h-5 text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 tracking-wider">
+                Đang xem
+              </p>
+              <h2 className="text-sm font-bold text-zinc-800 dark:text-zinc-100 truncate">
+                {journeyName}
+              </h2>
+            </div>
+          </div>
+        )}
+
         <div className="bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md rounded-2xl shadow-2xl p-4 border border-zinc-200 dark:border-zinc-800 transition-all duration-300">
           <div className="relative flex flex-col gap-6">
             {/* Vertical Dotted Line */}
@@ -181,9 +215,15 @@ const SearchPanel = ({ locations, onUpdateLocations }: SearchPanelProps) => {
               onClick={addNewLocation}
               className="flex-1"
             >
-              Thêm địa điểm
+              Thêm
             </Button>
             <div className="flex gap-2">
+              <Button
+                variant="secondary"
+                icon="mdi:account"
+                onClick={() => setIsDrawerOpen(true)}
+                title="Hành trình của tôi"
+              />
               <Button
                 variant="primary"
                 icon="mdi:check"
@@ -193,22 +233,27 @@ const SearchPanel = ({ locations, onUpdateLocations }: SearchPanelProps) => {
               >
                 Lưu
               </Button>
-              <Button
-                variant="primary"
-                icon="mdi:account"
-                onClick={() => setIsDrawerOpen(true)}
-                title="Hành trình của tôi"
-              />
             </div>
           </div>
         </div>
+
+        {journeyId && (
+          <Link href="/">
+            <Button
+              variant="secondary"
+              icon="mdi:arrow-left"
+              className="ml-auto bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md shadow-lg border border-zinc-200 dark:border-zinc-800"
+            />
+          </Link>
+        )}
       </div>
 
       <JourneyDrawer
         isOpen={isDrawerOpen}
         onClose={() => setIsDrawerOpen(false)}
-        onSelectJourney={(locs) => onUpdateLocations(locs)}
       />
+
+      <PlaceDetails />
     </>
   );
 };

@@ -23,25 +23,27 @@ const MapRoutes = ({ locations }: MapRoutesProps) => {
     prevLocationsRef.current = locationsKey;
 
     if (validLocations.length < 2) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setRoutePoints((prev) => (prev.length > 0 ? [] : prev));
       return;
     }
 
     const fetchRoute = async () => {
       try {
-        const coordinates = validLocations
-          .map((loc) => `${loc.lon},${loc.lat}`)
-          .join(";");
+        const response = await fetch("/api/directions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            coordinates: validLocations.map((loc) => [loc.lon, loc.lat]),
+          }),
+        });
 
-        const response = await fetch(
-          `https://router.project-osrm.org/route/v1/driving/${coordinates}?overview=full&geometries=geojson`,
-        );
-
+        if (!response.ok) throw new Error("Failed to fetch directions");
         const data = await response.json();
 
-        if (data.code === "Ok" && data.routes && data.routes[0]) {
-          const points = data.routes[0].geometry.coordinates; // [lon, lat]
+        if (data.features && data.features[0]) {
+          const points = data.features[0].geometry.coordinates; // [[lon, lat], ...]
           setRoutePoints(points);
 
           if (points.length > 0 && map) {

@@ -1,29 +1,67 @@
 "use client";
-import { Location, LocationProperties } from "@/app/types/map";
+
+import { Location } from "@/app/types/map";
 import { useSession } from "next-auth/react";
-import dynamic from "next/dynamic";
-import { useState } from "react";
+import { useEffect } from "react";
 import AuthModal from "../components/auth/AuthModal";
+import { useMapContext } from "../context/MapContext";
 import SearchPanel from "./SearchPanel";
 
-const MapComponent = dynamic(() => import("./Map"), {
-  ssr: false,
-  loading: () => <p className="text-center p-10">Đang tải bản đồ...</p>,
-});
+interface MapLoaderProps {
+  journeyId?: string;
+}
 
-const DEFAULT_CENTER: [number, number] = [10.762622, 106.660172]; // Tọa độ TP.HCM
-
-const MapLoader = () => {
+const MapLoader = ({ journeyId }: MapLoaderProps) => {
   const { status } = useSession();
-  const [center, setCenter] = useState<[number, number]>(DEFAULT_CENTER);
-  const [locations, setLocations] = useState<Location[]>([
-    {
-      id: "initial",
-      lat: DEFAULT_CENTER[0],
-      lon: DEFAULT_CENTER[1],
-      name: "Thành phố Hồ chí Minh",
-    },
+  const {
+    locations,
+    setLocations,
+    setCenter,
+    setJourneyName,
+    resetMap,
+    setClickedPlace,
+  } = useMapContext();
+
+  // Sync journey data if ID changes
+  useEffect(() => {
+    if (!journeyId) {
+      resetMap();
+      return;
+    }
+
+    const fetchJourney = async () => {
+      try {
+        const response = await fetch(`/api/journeys/${journeyId}`);
+        if (!response.ok) throw new Error("Failed to fetch journey");
+        const data = await response.json();
+
+        if (data.name) {
+          setJourneyName(data.name);
+        }
+
+        if (data.locations && data.locations.length > 0) {
+          setLocations(data.locations);
+          const first = data.locations[0];
+          if (first.lat && first.lon) {
+            setCenter([first.lat, first.lon]);
+          }
+        }
+        setClickedPlace(null);
+      } catch (error) {
+        console.error("Error fetching journey:", error);
+      }
+    };
+
+    fetchJourney();
+  }, [
+    journeyId,
+    setLocations,
+    setCenter,
+    setJourneyName,
+    resetMap,
+    setClickedPlace,
   ]);
+
   const handleUpdateLocations = (newLocations: Location[]) => {
     setLocations(newLocations);
     if (newLocations.length > 0) {
@@ -34,44 +72,26 @@ const MapLoader = () => {
     }
   };
 
-  const handleUpdateProperties = (
-    id: string,
-    properties: LocationProperties,
-  ) => {
-    setLocations((prev) =>
-      prev.map((loc) => (loc.id === id ? { ...loc, properties } : loc)),
-    );
-  };
-
-  const markers = locations
-    .filter((loc) => loc.lat !== 0 && loc.lon !== 0)
-    .map((loc) => ({
-      id: loc.id,
-      position: [loc.lat, loc.lon] as [number, number],
-      label: loc.name,
-      properties: loc.properties,
-    }));
-
   const isUnauthenticated = status === "unauthenticated";
 
   return (
-    <div className="relative w-full h-full">
-      {isUnauthenticated && <AuthModal />}
+    <div className="relative w-full h-full pointer-events-none">
+      {isUnauthenticated && (
+        <div className="pointer-events-auto">
+          <AuthModal />
+        </div>
+      )}
 
       <div
-        className={`w-full h-full transition-all duration-500 ${isUnauthenticated ? "pointer-events-none select-none blur-[2px] opacity-50" : ""}`}
+        className={`w-full h-full transition-all duration-500 pointer-events-none ${
+          isUnauthenticated ? "select-none blur-[2px] opacity-50" : ""
+        }`}
       >
         <SearchPanel
           locations={locations}
           onUpdateLocations={handleUpdateLocations}
+          journeyId={journeyId}
         />
-        <div className="w-full h-full">
-          <MapComponent
-            center={center}
-            markers={markers}
-            onUpdateProperties={handleUpdateProperties}
-          />
-        </div>
       </div>
     </div>
   );
