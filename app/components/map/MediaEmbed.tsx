@@ -20,7 +20,7 @@ const TikTokEmbed = ({ id }: { id: string }) => (
 const YouTubeEmbed = ({ id }: { id: string }) => (
   <div className="relative aspect-video w-full overflow-hidden rounded-2xl bg-black shadow-xl ring-1 ring-zinc-200 dark:ring-zinc-800">
     <iframe
-      src={`https://www.youtube.com/embed/${id}?autoplay=0&rel=0`}
+      src={`https://www.youtube.com/embed/${id}?autoplay=1&rel=0`}
       className="w-full h-full border-none"
       allowFullScreen
       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"

@@ -23,6 +23,10 @@ const JourneySchema = new mongoose.Schema(
       default: "Vi vu",
     },
     locations: [LocationSchema],
+    totalDistance: {
+      type: Number,
+      default: 0,
+    },
   },
   {
     timestamps: true,

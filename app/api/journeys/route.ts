@@ -13,7 +13,7 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { locations } = body;
+    const { locations, totalDistance } = body;
 
     if (!locations || !Array.isArray(locations)) {
       return NextResponse.json(
@@ -28,6 +28,7 @@ export async function POST(req: Request) {
       userId: (session.user as { id: string }).id,
       name: "Vi vu",
       locations,
+      totalDistance: totalDistance || 0,
     });
 
     return NextResponse.json(journey);

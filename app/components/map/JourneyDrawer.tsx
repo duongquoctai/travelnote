@@ -16,6 +16,7 @@ interface Journey {
   name: string;
   createdAt: string;
   locations: Location[];
+  totalDistance?: number;
 }
 
 interface JourneyDrawerProps {
@@ -102,7 +103,7 @@ const JourneyCard = memo(
             </form>
           ) : (
             <div className="flex items-center gap-2 flex-1">
-              <h3 className="font-bold text-zinc-800 dark:text-zinc-100 group-hover:text-blue-500 transition-colors">
+              <h3 className="font-semibold text-blue-500 transition-colors">
                 {journey.name}
               </h3>
               <Button
@@ -125,6 +126,12 @@ const JourneyCard = memo(
             <Icon icon="mdi:map-marker" />
             {journey.locations.length} điểm đến
           </span>
+          {journey.totalDistance !== undefined && journey.totalDistance > 0 && (
+            <span className="flex items-center gap-1">
+              <Icon icon="mdi:map-marker-distance" />
+              {journey.totalDistance.toFixed(1)}km
+            </span>
+          )}
         </div>
 
         <Button

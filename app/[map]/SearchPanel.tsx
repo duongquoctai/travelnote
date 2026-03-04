@@ -28,7 +28,12 @@ const SearchPanel = ({
   journeyId,
 }: SearchPanelProps) => {
   const router = useRouter();
-  const { journeyName, setSelectedLocationId } = useMapContext();
+  const {
+    journeyName,
+    setSelectedLocationId,
+    segmentDistances,
+    totalDistance,
+  } = useMapContext();
   const [queries, setQueries] = useState<Record<string, string>>({});
   const [activeResults, setActiveResults] = useState<{
     id: string;
@@ -158,13 +163,12 @@ const SearchPanel = ({
     try {
       const url = journeyId ? `/api/journeys/${journeyId}` : "/api/journeys";
       const method = journeyId ? "PATCH" : "POST";
-
       const response = await fetch(url, {
         method,
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ locations }),
+        body: JSON.stringify({ locations, totalDistance }),
       });
 
       if (!response.ok) throw new Error("Failed to save journey");
@@ -207,7 +211,7 @@ const SearchPanel = ({
           variant="secondary"
           icon="mdi:chevron-left"
           onClick={() => setIsVisible(true)}
-          className="bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md shadow-xl border border-zinc-200 dark:border-zinc-800 w-12 h-12 rounded-xl pointer-events-auto hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all"
+          className="pointer-events-auto"
           title="Hiện bảng tìm kiếm"
         />
       </div>
@@ -243,57 +247,65 @@ const SearchPanel = ({
               <div className="absolute left-[13px] top-4 bottom-4 w-px border-l-2 border-dotted border-zinc-300 dark:border-zinc-700 z-0" />
             )}
 
-            {locations.map((location) => (
-              <SearchInput
-                key={location.id}
-                id={location.id}
-                query={queries[location.id] || ""}
-                loading={loadingStates[location.id] || false}
-                onQueryChange={handleInputChange}
-                onRemove={removeLocation}
-                onSelect={selectLocation}
-                activeResults={
-                  activeResults?.id === location.id ? activeResults.items : null
-                }
-                isActive={activeResults?.id === location.id}
-                isOnlyItem={locations.length <= 1}
-              />
+            {locations.map((location, index) => (
+              <div key={location.id} className="relative">
+                <SearchInput
+                  id={location.id}
+                  query={queries[location.id] || ""}
+                  loading={loadingStates[location.id] || false}
+                  onQueryChange={handleInputChange}
+                  onRemove={removeLocation}
+                  onSelect={selectLocation}
+                  activeResults={
+                    activeResults?.id === location.id
+                      ? activeResults.items
+                      : null
+                  }
+                  isActive={activeResults?.id === location.id}
+                  isOnlyItem={locations.length <= 1}
+                />
+                {index < locations.length - 1 &&
+                  segmentDistances[index] !== undefined && (
+                    <div className="absolute left-[13px] top-[calc(100%+12px)] z-10 -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-zinc-800 px-2 py-0.5 rounded-full border border-zinc-200 dark:border-zinc-700 text-[10px] font-bold text-blue-500 shadow-sm animate-in fade-in zoom-in duration-500">
+                      {segmentDistances[index].toFixed(1)}km
+                    </div>
+                  )}
+              </div>
             ))}
           </div>
 
-          <div className="flex gap-2 mt-6">
+          <div className="flex gap-2 mt-4 justify-between">
             <Button
+              className="flex-1"
               variant="secondary"
               icon="mdi:chevron-right"
               onClick={() => setIsVisible(false)}
-              className="w-12"
               title="Ẩn bảng tìm kiếm"
             />
             <Button
               className="flex-1"
-              variant="outline"
+              variant="secondary"
+              icon="mdi:account"
+              onClick={() => setIsDrawerOpen(true)}
+              title="Hành trình của tôi"
+            />
+            <Button
+              className="flex-1"
+              variant="secondary"
               icon="mdi:plus"
               onClick={addNewLocation}
+            />
+
+            <Button
+              className="flex-1"
+              variant="primary"
+              icon="mdi:check"
+              onClick={handleSave}
+              isLoading={isSaving}
+              title="Lưu hành trình"
             >
-              Thêm
+              Lưu
             </Button>
-            <div className="flex gap-2">
-              <Button
-                variant="secondary"
-                icon="mdi:account"
-                onClick={() => setIsDrawerOpen(true)}
-                title="Hành trình của tôi"
-              />
-              <Button
-                variant="primary"
-                icon="mdi:check"
-                onClick={handleSave}
-                isLoading={isSaving}
-                title="Lưu hành trình"
-              >
-                Lưu
-              </Button>
-            </div>
           </div>
         </div>
 

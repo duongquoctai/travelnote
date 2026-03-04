@@ -50,13 +50,18 @@ export async function PATCH(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { name, locations } = await req.json();
+    const { name, locations, totalDistance } = await req.json();
 
     await dbConnect();
 
-    const updateData: { name?: string; locations?: Location[] } = {};
+    const updateData: {
+      name?: string;
+      locations?: Location[];
+      totalDistance?: number;
+    } = {};
     if (name) updateData.name = name;
     if (locations) updateData.locations = locations;
+    if (totalDistance !== undefined) updateData.totalDistance = totalDistance;
 
     const journey = await Journey.findOneAndUpdate(
       {

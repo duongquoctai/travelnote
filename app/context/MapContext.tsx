@@ -19,11 +19,14 @@ interface MapContextType {
   journeyName: string;
   clickedPlace: ClickedPlace | null;
   selectedLocationId: string | null;
+  segmentDistances: number[];
+  totalDistance: number;
   setLocations: (locs: Location[]) => void;
   setCenter: (center: [number, number]) => void;
   setJourneyName: (name: string) => void;
   setClickedPlace: (place: ClickedPlace | null) => void;
   setSelectedLocationId: (id: string | null) => void;
+  setDistances: (distances: number[], total: number) => void;
   updateLocationProperties: (
     id: string,
     properties: LocationProperties,
@@ -40,6 +43,8 @@ export const MapProvider = ({ children }: { children: React.ReactNode }) => {
   const [selectedLocationId, setSelectedLocationId] = useState<string | null>(
     null,
   );
+  const [segmentDistances, setSegmentDistances] = useState<number[]>([]);
+  const [totalDistance, setTotalDistance] = useState<number>(0);
   const [locations, setLocations] = useState<Location[]>([
     {
       id: "initial",
@@ -48,6 +53,11 @@ export const MapProvider = ({ children }: { children: React.ReactNode }) => {
       name: "Thành phố Hồ chí Minh",
     },
   ]);
+
+  const setDistances = useCallback((distances: number[], total: number) => {
+    setSegmentDistances(distances);
+    setTotalDistance(total);
+  }, []);
 
   const updateLocationProperties = useCallback(
     (id: string, properties: LocationProperties) => {
@@ -71,6 +81,8 @@ export const MapProvider = ({ children }: { children: React.ReactNode }) => {
     setJourneyName("");
     setClickedPlace(null);
     setSelectedLocationId(null);
+    setSegmentDistances([]);
+    setTotalDistance(0);
   }, []);
 
   return (
@@ -86,6 +98,9 @@ export const MapProvider = ({ children }: { children: React.ReactNode }) => {
         setClickedPlace,
         selectedLocationId,
         setSelectedLocationId,
+        segmentDistances,
+        totalDistance,
+        setDistances,
         updateLocationProperties,
         resetMap,
       }}

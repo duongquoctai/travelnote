@@ -3,6 +3,7 @@
 import maplibregl from "maplibre-gl";
 import { useEffect, useRef, useState } from "react";
 import { Layer, Source, useMap } from "react-map-gl/maplibre";
+import { useMapContext } from "../context/MapContext";
 
 interface MapRoutesProps {
   locations: Array<{ lat: number; lon: number }>;
@@ -11,6 +12,7 @@ interface MapRoutesProps {
 const MapRoutes = ({ locations }: MapRoutesProps) => {
   const [routePoints, setRoutePoints] = useState<[number, number][]>([]);
   const { current: map } = useMap();
+  const { setDistances } = useMapContext();
   const prevLocationsRef = useRef<string>("");
 
   useEffect(() => {
@@ -24,6 +26,7 @@ const MapRoutes = ({ locations }: MapRoutesProps) => {
 
     if (validLocations.length < 2) {
       setRoutePoints((prev) => (prev.length > 0 ? [] : prev));
+      setDistances([], 0);
       return;
     }
 
@@ -46,6 +49,16 @@ const MapRoutes = ({ locations }: MapRoutesProps) => {
           const points = data.features[0].geometry.coordinates; // [[lon, lat], ...]
           setRoutePoints(points);
 
+          // Extract distances
+          const properties = data.features[0].properties;
+          const totalDist = properties.summary.distance / 1000; // to km
+          const segments = properties.segments || [];
+          const segDistances = segments.map(
+            (s: { distance: number }) => s.distance / 1000,
+          );
+
+          setDistances(segDistances, totalDist);
+
           if (points.length > 0 && map) {
             const bounds = points.reduce(
               (acc: maplibregl.LngLatBounds, coord: [number, number]) => {
@@ -63,7 +76,7 @@ const MapRoutes = ({ locations }: MapRoutesProps) => {
     };
 
     fetchRoute();
-  }, [locations, map]);
+  }, [locations, map, setDistances]);
 
   if (routePoints.length === 0) return null;
 
